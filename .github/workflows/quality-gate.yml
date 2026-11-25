@@ -1,5 +1,4 @@
-# Quality gate do A3. Copiar para .github/workflows/quality-gate.yml na raiz do repositório do grupo
-# (a raiz é a pasta sac_qa_kit). O job final "quality-gate" é o ÚNICO check obrigatório da branch main.
+# Quality gate do A3. Este arquivo roda em .github/workflows/. O job final "quality-gate" deve ser o UNICO check obrigatorio da main.
 # Os limites são PROPOSTA do grupo, justificados no documento de entregáveis (seção 4 e 6).
 name: quality-gate
 
