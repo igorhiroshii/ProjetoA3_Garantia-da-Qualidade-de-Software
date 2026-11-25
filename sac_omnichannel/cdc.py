@@ -1,2 +1,2 @@
 def pode_arrepender(recebimento, hoje):
-    return True
+    return (hoje - recebimento).days <= 7
