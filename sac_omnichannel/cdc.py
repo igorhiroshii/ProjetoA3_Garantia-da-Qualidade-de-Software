@@ -1,2 +1,5 @@
 def pode_arrepender(recebimento, hoje):
-    return (hoje - recebimento).days <= 7
+    dias = (hoje - recebimento).days
+    if dias < 0:
+        raise ValueError("data de recebimento no futuro")
+    return dias <= 7
