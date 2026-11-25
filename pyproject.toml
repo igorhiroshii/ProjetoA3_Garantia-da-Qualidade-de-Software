@@ -1,0 +1,16 @@
+[tool.ruff]
+line-length = 160
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B"]
+ignore = ["E701", "E702", "E731", "E741", "B905", "B007", "B904"]       # estilo compacto dos testes e do seed
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E501", "E402", "B011", "B017", "I001"]
+"triage/*" = ["E402", "I001"]
+"seed/*" = ["E501", "I001"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+addopts = "-p no:cacheprovider"

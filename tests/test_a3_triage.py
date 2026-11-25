@@ -17,7 +17,7 @@ from hypothesis import given, settings
 from hypothesis import strategies as st
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from triage.metricas import LIMITES, avaliar, carregar, checar_gate
+from triage.metricas import avaliar, carregar, checar_gate
 from triage.triage import (CATEGORIAS_POR_FILA, ORDEM, URGENCIAS, LLMTriager, RuleBasedTriager, extrair_json,
                            montar_prompt, normalizar)
 

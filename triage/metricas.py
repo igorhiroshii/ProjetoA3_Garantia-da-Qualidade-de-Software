@@ -2,10 +2,10 @@
 from __future__ import annotations
 
 import json
-from collections import Counter, defaultdict
+from collections import Counter
 from pathlib import Path
 
-from .triage import ORDEM, URGENCIAS
+from .triage import URGENCIAS
 
 GOLDEN = Path(__file__).with_name("golden_set.jsonl")
 

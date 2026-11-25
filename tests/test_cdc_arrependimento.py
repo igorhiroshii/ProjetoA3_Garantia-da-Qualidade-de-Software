@@ -1,6 +1,10 @@
-from datetime import date
+from datetime import date, timedelta
 
-from sac_omnichannel.cdc import pode_arrepender
+import pytest
+from hypothesis import given
+from hypothesis import strategies as st
+
+from sac_omnichannel.cdc import avaliar_arrependimento, pode_arrepender
 
 HOJE = date(2026, 11, 24)
 
@@ -14,12 +18,8 @@ def test_no_setimo_dia_ainda_pode_e_no_oitavo_nao():
     assert pode_arrepender(recebimento=date(2026, 11, 16), hoje=HOJE) is False     # 8 dias depois
 
 
-import pytest
-
-
 @pytest.mark.parametrize("dias,esperado", [(0, True), (1, True), (6, True), (7, True), (8, False), (9, False), (30, False)])
 def test_analise_de_valor_limite_do_prazo(dias, esperado):
-    from datetime import timedelta
     assert pode_arrepender(recebimento=HOJE - timedelta(days=dias), hoje=HOJE) is esperado
 
 
@@ -28,13 +28,7 @@ def test_recebimento_no_futuro_e_dado_invalido():
         pode_arrepender(recebimento=date(2026, 11, 25), hoje=HOJE)
 
 
-from hypothesis import given, strategies as st
-
-from sac_omnichannel.cdc import avaliar_arrependimento
-
-
 @given(dias=st.integers(0, 3650))
 def test_propriedade_pode_se_e_so_se_dias_ate_7_e_restantes_nunca_negativo(dias):
-    from datetime import timedelta
     r = avaliar_arrependimento(HOJE - timedelta(days=dias), HOJE)
     assert r.pode is (dias <= 7) and r.dias_restantes == max(7 - dias, 0) and r.dias_restantes >= 0
