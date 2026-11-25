@@ -8,7 +8,7 @@ Tudo abaixo foi executado. Onde algo é estimativa ou escolha do grupo, está di
 
 ## 1. Resumo para quem tem 2 minutos
 
-- O sistema original tem **720 testes passando e 91,3% de cobertura de linhas**. Mesmo assim encontramos **9 defeitos** (F-01 a F-09), todos com teste que reproduz o problema.
+- O sistema original tem **720 testes passando e 91,3% de cobertura (linhas e ramos combinados; 83,1% só de ramos)**. Mesmo assim encontramos **9 defeitos** (F-01 a F-09), todos com teste que reproduz o problema.
 - A cobertura não via nada disso. Exemplo: `helpdesk/user.py` tinha 48 de 61 mutantes mortos pela suíte de permissões. Com testes novos escritos para os sobreviventes foram 61 de 61.
 - Para o SAC, os dois defeitos mais graves são **F-01/F-02/F-03** (o escalonamento por prazo erra a conta e escalona em dia proibido) e **F-04** (apagar filas em lote deixa permissão órfã e derruba a recriação da fila com HTTP 500).
 - O isolamento entre filas (varejo não vê banco, banco não vê ouvidoria) **resistiu** a 8 ataques que tentamos.
@@ -85,7 +85,7 @@ Testes que **passam** e servem de guarda contra regressão: atendente de varejo 
 | Teste de dentes | portão de isolamento e gate da triagem | desligamos a proteção e os testes falham; piorar o piso faz o gate reprovar |
 
 Honestidade sobre a mutação:
-- Um dos 10 "sobreviventes" iniciais de `user.py` era falso: o mutmut só rodava um subconjunto de testes. Conferimos contra a suíte completa antes de escrever teste.
+- Dos 10 sobreviventes iniciais de `user.py`, conferimos 4 contra a suíte completa: 3 morriam com ela (o mutmut rodava só 7 arquivos de teste) e 1 era lacuna real. Os outros 6 não foram conferidos, então o ganho de 48 para 61 está superestimado.
 - Em `triage.py`, restam 7 mutantes vivos e todos são **equivalentes** (valor padrão igual ao valor explícito, ou só o texto de uma mensagem). Outros 42 estão no adaptador `anthropic_llm`, que precisa de chave de API e não roda nos testes.
 - O número 97,7% é de **um módulo pequeno que nós mesmos escrevemos**. Não é comparável ao do Helpdesk.
 
@@ -152,7 +152,7 @@ O job `llm-real` só roda se alguém configurar `ANTHROPIC_API_KEY` e a variáve
 # 1) testes do Helpdesk + A3 (da raiz do django-helpdesk)
 DJANGO_SETTINGS_MODULE=tests.test_settings PYTHONPATH=src:. \
   python -m pytest ../sac_qa_kit/tests -p no:cacheprovider --no-cov -q -W ignore
-#    esperado: 82 passed, 11 xfailed
+#    esperado: 99 passed, 11 xfailed
 
 # 2) triagem (da raiz do sac_qa_kit, sem Django)
 python -m pytest tests/test_a3_triage.py tests/test_a3_triage_mutantes.py -p no:cacheprovider -q
@@ -166,3 +166,6 @@ python -m triage.rodar_avaliacao --real --gate      # exige ANTHROPIC_API_KEY
 - Mostre F-02 com a data: o prazo "encurta" quando deveria estender.
 - Mostre a tabela da seção 5 e a frase: "21 viram 1 com guardrails, e o 1 que sobra é do nosso piso, não do LLM".
 - Se perguntarem "e com um modelo de verdade?", a resposta honesta é que ainda não medimos e o job `llm-real` existe para isso.
+
+
+> Atualização: o documento dos 10 entregáveis (Claude Docs) usa estes mesmos números. Desde a primeira versão deste relatório foram adicionados `sac_omnichannel/` (TDD do prazo do CDC), BDD em português, scripts de catraca em `ci/` e o repositório git do kit.
