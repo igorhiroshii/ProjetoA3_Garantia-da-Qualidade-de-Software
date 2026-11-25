@@ -1,0 +1,6 @@
+# Quem precisa aprovar mudanças nos arquivos de maior risco. Trocar pelos usuários reais do grupo.
+/sac_omnichannel/        @grupo-a3/qualidade
+/triage/                 @grupo-a3/qualidade
+/ci/                     @grupo-a3/qualidade
+/.github/                @grupo-a3/qualidade
+/seed/                   @grupo-a3/dados
