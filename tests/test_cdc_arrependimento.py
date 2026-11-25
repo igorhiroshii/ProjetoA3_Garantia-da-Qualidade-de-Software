@@ -26,3 +26,15 @@ def test_analise_de_valor_limite_do_prazo(dias, esperado):
 def test_recebimento_no_futuro_e_dado_invalido():
     with pytest.raises(ValueError, match="futuro"):
         pode_arrepender(recebimento=date(2026, 11, 25), hoje=HOJE)
+
+
+from hypothesis import given, strategies as st
+
+from sac_omnichannel.cdc import avaliar_arrependimento
+
+
+@given(dias=st.integers(0, 3650))
+def test_propriedade_pode_se_e_so_se_dias_ate_7_e_restantes_nunca_negativo(dias):
+    from datetime import timedelta
+    r = avaliar_arrependimento(HOJE - timedelta(days=dias), HOJE)
+    assert r.pode is (dias <= 7) and r.dias_restantes == max(7 - dias, 0) and r.dias_restantes >= 0
