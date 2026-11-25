@@ -1,0 +1,29 @@
+{
+  "get_queues_7  (and -> or no portao de permissao por fila)": {
+    "killed_by_full_suite": true,
+    "detail": [
+      "FAILED tests/test_api.py::TicketTest::test_create_api_ticket_authenticated_staff_user",
+      "1 failed, 1 passed, 3 deselected in 2.56s"
+    ]
+  },
+  "get_queues_4  (filtro de filas publicas True -> None)": {
+    "killed_by_full_suite": false,
+    "detail": [
+      "717 passed, 2 skipped, 3 deselected, 311 subtests passed in 17.05s"
+    ]
+  },
+  "can_edit_followup_4  (followup sem autor passa a ser editavel)": {
+    "killed_by_full_suite": true,
+    "detail": [
+      "FAILED tests/test_followup_menu.py::FollowUpMenuTests::test_no_menu_on_a_followup_without_an_author",
+      "1 failed, 176 passed, 2 skipped, 3 deselected, 75 subtests passed in 6.38s"
+    ]
+  },
+  "can_access_kbcategory_3  (and -> or em categoria de KB)": {
+    "killed_by_full_suite": true,
+    "detail": [
+      "FAILED tests/test_kb_index_view.py::KBIndexViewTests::test_anonymous_user_can_access",
+      "1 failed, 277 passed, 2 skipped, 3 deselected, 80 subtests passed in 9.45s"
+    ]
+  }
+}

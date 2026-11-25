@@ -1,0 +1,70 @@
+# Quality gate do A3 (GitHub Actions). Copie para .github/workflows/ do repositório do grupo.
+# Três portões: (1) testes de defeito/guarda sobre o Django-Helpdesk, (2) mutação nos módulos críticos,
+# (3) triagem de urgência contra o conjunto de ouro. Os limites são PROPOSTA do grupo, não norma.
+name: quality-gate
+on:
+  pull_request:
+  push: { branches: [main] }
+  schedule: [{ cron: "0 6 * * 1" }]          # segunda 06:00 UTC: mutação completa e avaliação com LLM real
+
+jobs:
+  testes-e-seguranca:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: { repository: django-helpdesk/django-helpdesk, ref: main, path: django-helpdesk }   # ajuste o ref para a versão auditada
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -e "django-helpdesk[test]" pytest-django hypothesis freezegun bandit
+      - name: Testes A3 (defeitos confirmados ficam como xfail strict: se alguém corrigir, o CI avisa)
+        working-directory: django-helpdesk
+        env: { DJANGO_SETTINGS_MODULE: tests.test_settings }
+        run: python -m pytest ../tests -p no:cacheprovider --no-cov -q -W ignore
+      - name: Varredura estática (bandit) apenas em severidade média/alta
+        run: bandit -r django-helpdesk/helpdesk -ll -q || true       # informativo; troque por falha quando houver baseline limpo
+
+  triagem-llm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install pytest hypothesis
+      - name: Testes dos guardrails
+        run: python -m pytest tests/test_a3_triage.py tests/test_a3_triage_mutantes.py -p no:cacheprovider -q
+      - name: Gate da triagem (perfis roteirizados; reprova violação nova)
+        run: python -m triage.rodar_avaliacao --gate --conhecidas ci/gate_conhecido.json --saida results/avaliacao_roteirizada.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: avaliacao-triagem, path: results/avaliacao_roteirizada.json }
+
+  mutacao-semanal:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install pytest hypothesis mutmut==3.8.1
+      - name: Mutação em triage/triage.py (exige pelo menos 95% dos mutantes testáveis mortos)
+        run: |
+          mutmut run --max-children 4
+          python - <<'PY'
+          import subprocess,re
+          out=subprocess.run(["mutmut","results"],capture_output=True,text=True).stdout
+          vivos=len(re.findall(r"survived",out)); print("sobreviventes:",vivos)
+          assert vivos<=15, "score de mutação abaixo do limite"
+          PY
+
+  llm-real:
+    if: github.event_name == 'schedule' && vars.USAR_LLM_REAL == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install anthropic
+      - name: Gate com modelo real (limites completos: recall >= 0,95; FN crítico = 0; injeção = 0)
+        env: { ANTHROPIC_API_KEY: "${{ secrets.ANTHROPIC_API_KEY }}" }
+        run: python -m triage.rodar_avaliacao --real --gate --saida results/avaliacao_real.json

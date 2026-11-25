@@ -1,0 +1,49 @@
+    triage.triage.x_normalizar__mutmut_28: survived
+    triage.triage.xǁRuleBasedTriagerǁclassify__mutmut_11: survived
+    triage.triage.xǁRuleBasedTriagerǁclassify__mutmut_26: survived
+    triage.triage.xǁRuleBasedTriagerǁclassify__mutmut_29: survived
+    triage.triage.xǁRuleBasedTriagerǁclassify__mutmut_38: survived
+    triage.triage.xǁLLMTriagerǁclassify__mutmut_53: survived
+    triage.triage.xǁLLMTriagerǁclassify__mutmut_55: survived
+    triage.triage.x_anthropic_llm__mutmut_1: no tests
+    triage.triage.x_anthropic_llm__mutmut_2: no tests
+    triage.triage.x_anthropic_llm__mutmut_3: no tests
+    triage.triage.x_anthropic_llm__mutmut_4: no tests
+    triage.triage.x_anthropic_llm__mutmut_5: no tests
+    triage.triage.x_anthropic_llm__mutmut_6: no tests
+    triage.triage.x_anthropic_llm__mutmut_7: no tests
+    triage.triage.x_anthropic_llm__mutmut_8: no tests
+    triage.triage.x_anthropic_llm__mutmut_9: no tests
+    triage.triage.x_anthropic_llm__mutmut_10: no tests
+    triage.triage.x_anthropic_llm__mutmut_11: no tests
+    triage.triage.x_anthropic_llm__mutmut_12: no tests
+    triage.triage.x_anthropic_llm__mutmut_13: no tests
+    triage.triage.x_anthropic_llm__mutmut_14: no tests
+    triage.triage.x_anthropic_llm__mutmut_15: no tests
+    triage.triage.x_anthropic_llm__mutmut_16: no tests
+    triage.triage.x_anthropic_llm__mutmut_17: no tests
+    triage.triage.x_anthropic_llm__mutmut_18: no tests
+    triage.triage.x_anthropic_llm__mutmut_19: no tests
+    triage.triage.x_anthropic_llm__mutmut_20: no tests
+    triage.triage.x_anthropic_llm__mutmut_21: no tests
+    triage.triage.x_anthropic_llm__mutmut_22: no tests
+    triage.triage.x_anthropic_llm__mutmut_23: no tests
+    triage.triage.x_anthropic_llm__mutmut_24: no tests
+    triage.triage.x_anthropic_llm__mutmut_25: no tests
+    triage.triage.x_anthropic_llm__mutmut_26: no tests
+    triage.triage.x_anthropic_llm__mutmut_27: no tests
+    triage.triage.x_anthropic_llm__mutmut_28: no tests
+    triage.triage.x_anthropic_llm__mutmut_29: no tests
+    triage.triage.x_anthropic_llm__mutmut_30: no tests
+    triage.triage.x_anthropic_llm__mutmut_31: no tests
+    triage.triage.x_anthropic_llm__mutmut_32: no tests
+    triage.triage.x_anthropic_llm__mutmut_33: no tests
+    triage.triage.x_anthropic_llm__mutmut_34: no tests
+    triage.triage.x_anthropic_llm__mutmut_35: no tests
+    triage.triage.x_anthropic_llm__mutmut_36: no tests
+    triage.triage.x_anthropic_llm__mutmut_37: no tests
+    triage.triage.x_anthropic_llm__mutmut_38: no tests
+    triage.triage.x_anthropic_llm__mutmut_39: no tests
+    triage.triage.x_anthropic_llm__mutmut_40: no tests
+    triage.triage.x_anthropic_llm__mutmut_41: no tests
+    triage.triage.x_anthropic_llm__mutmut_42: no tests

@@ -1,0 +1,1 @@
+{"alvo":"triage/triage.py","mutantes":340,"mortos":291,"sobreviventes_equivalentes":7,"sem_teste_adaptador_api":42,"score_testaveis":"291/298 = 97.7%","antes":{"mortos":199,"sobreviventes":104,"sem_teste":42,"total":345}}
