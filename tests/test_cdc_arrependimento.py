@@ -32,3 +32,8 @@ def test_recebimento_no_futuro_e_dado_invalido():
 def test_propriedade_pode_se_e_so_se_dias_ate_7_e_restantes_nunca_negativo(dias):
     r = avaliar_arrependimento(HOJE - timedelta(days=dias), HOJE)
     assert r.pode is (dias <= 7) and r.dias_restantes == max(7 - dias, 0) and r.dias_restantes >= 0
+
+
+def test_resultado_informa_dias_decorridos_e_restantes():
+    r = avaliar_arrependimento(HOJE - timedelta(days=3), HOJE)
+    assert (r.pode, r.dias_decorridos, r.dias_restantes) == (True, 3, 4)
