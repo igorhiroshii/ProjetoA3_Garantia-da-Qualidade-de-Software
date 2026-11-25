@@ -32,3 +32,4 @@ SemVer em tags `vMAJOR.MINOR.PATCH`; o histórico de mudanças está em `CHANGEL
 
 ## Limites
 Sem LLM real, sem execução do workflow no GitHub, rótulos de ouro de uma pessoa só. Detalhes no `RELATORIO.md`.
+Teste do quality gate.
