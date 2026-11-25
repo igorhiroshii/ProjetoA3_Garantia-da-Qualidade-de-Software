@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "${{ env.PYTHON }}", cache: pip }
+        with: { python-version: "${{ env.PYTHON }}" }
       - run: pip install ruff bandit
       - name: "Lint (ruff, regras E F W I B)"
         run: ruff check .
@@ -32,7 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "${{ env.PYTHON }}", cache: pip }
+        with: { python-version: "${{ env.PYTHON }}" }
       - run: pip install pytest pytest-cov pytest-bdd hypothesis
       - name: "Testes sem banco, com cobertura de RAMO"
         run: |
@@ -49,8 +49,8 @@ jobs:
           git clone https://github.com/django-helpdesk/django-helpdesk.git django-helpdesk
           git -C django-helpdesk checkout "$HELPDESK_COMMIT"
       - uses: actions/setup-python@v5
-        with: { python-version: "${{ env.PYTHON }}", cache: pip }
-      - run: pip install -e "./django-helpdesk" pytest pytest-django pytest-cov hypothesis freezegun djangorestframework
+        with: { python-version: "${{ env.PYTHON }}" }
+      - run: pip install -e "./django-helpdesk" pytest pytest-django pytest-cov hypothesis freezegun djangorestframework factory-boy faker mock numpy pillow pysocks pbr
       - name: "Suite original do Helpdesk (esperado: 720 passam, 2 pulados)"
         working-directory: django-helpdesk
         env: { DJANGO_SETTINGS_MODULE: tests.test_settings }
@@ -72,7 +72,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "${{ env.PYTHON }}", cache: pip }
+        with: { python-version: "${{ env.PYTHON }}" }
       - name: "Avaliação com perfis de LLM roteirizados (reprova violação nova)"
         run: python -m triage.rodar_avaliacao --gate --conhecidas ci/gate_conhecido.json --saida results/avaliacao_roteirizada.json
       - uses: actions/upload-artifact@v4
@@ -84,7 +84,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "${{ env.PYTHON }}", cache: pip }
+        with: { python-version: "${{ env.PYTHON }}" }
       - run: pip install pytest pytest-bdd hypothesis mutmut==3.8.1
       - name: "Mutação em triage.py e cdc.py (cerca de 1 minuto), nenhum sobrevivente fora da lista de equivalentes"
         run: |
@@ -101,8 +101,8 @@ jobs:
           git clone https://github.com/django-helpdesk/django-helpdesk.git django-helpdesk
           git -C django-helpdesk checkout "$HELPDESK_COMMIT"
       - uses: actions/setup-python@v5
-        with: { python-version: "${{ env.PYTHON }}", cache: pip }
-      - run: pip install -e "./django-helpdesk" pytest pytest-django hypothesis freezegun djangorestframework mutmut==3.8.1
+        with: { python-version: "${{ env.PYTHON }}" }
+      - run: pip install -e "./django-helpdesk" pytest pytest-django hypothesis freezegun djangorestframework factory-boy faker mock numpy pillow pysocks pbr mutmut==3.8.1
       - name: "Mutação em helpdesk/user.py com a suíte de permissões (meta de 100% de mortos, linha de base 61 de 61)"
         working-directory: django-helpdesk
         env: { DJANGO_SETTINGS_MODULE: tests.test_settings }
@@ -116,7 +116,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "${{ env.PYTHON }}", cache: pip }
+        with: { python-version: "${{ env.PYTHON }}" }
       - run: pip install anthropic
       - name: "Gate com modelo real (limites completos)"
         env: { ANTHROPIC_API_KEY: "${{ secrets.ANTHROPIC_API_KEY }}" }
