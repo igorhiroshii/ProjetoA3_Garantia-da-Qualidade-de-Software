@@ -14,3 +14,14 @@ ignore = ["E701", "E702", "E731", "E741", "B905", "B007", "B904"]       # estilo
 [tool.pytest.ini_options]
 pythonpath = ["."]
 addopts = "-p no:cacheprovider"
+
+[tool.coverage.run]
+branch = true
+source = ["sac_omnichannel", "triage"]
+omit = ["triage/rodar_avaliacao.py"]
+
+[tool.mutmut]
+source_paths = ["triage/triage.py", "sac_omnichannel/cdc.py"]
+also_copy = ["triage", "sac_omnichannel", "tests", "pyproject.toml"]
+pytest_add_cli_args = ["-p", "no:cacheprovider", "-q", "-W", "ignore"]
+pytest_add_cli_args_test_selection = ["tests/test_a3_triage.py", "tests/test_a3_triage_mutantes.py", "tests/test_cdc_arrependimento.py"]

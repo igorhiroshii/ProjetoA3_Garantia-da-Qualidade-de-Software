@@ -1,0 +1,34 @@
+[
+  {
+    "mutante": "triage.triage.x_normalizar__mutmut_28",
+    "justificativa": "A lista de espaços permitidos ganha a letra X, mas só importa para caracteres de controle e 'X' não é controle."
+  },
+  {
+    "mutante": "triage.triage.xǁRuleBasedTriagerǁclassify__mutmut_11",
+    "justificativa": "origem='regras' já é o valor padrão do dataclass Resultado."
+  },
+  {
+    "mutante": "triage.triage.xǁRuleBasedTriagerǁclassify__mutmut_26",
+    "justificativa": "origem='regras' já é o valor padrão do dataclass Resultado."
+  },
+  {
+    "mutante": "triage.triage.xǁRuleBasedTriagerǁclassify__mutmut_29",
+    "justificativa": "muda só o texto da justificativa (mensagem livre)."
+  },
+  {
+    "mutante": "triage.triage.xǁRuleBasedTriagerǁclassify__mutmut_38",
+    "justificativa": "origem='regras' já é o valor padrão do dataclass Resultado."
+  },
+  {
+    "mutante": "triage.triage.xǁLLMTriagerǁclassify__mutmut_53",
+    "justificativa": "justificativa ausente vira None em vez de '', e a linha seguinte converte não-texto em ''."
+  },
+  {
+    "mutante": "triage.triage.xǁLLMTriagerǁclassify__mutmut_55",
+    "justificativa": "idem: o valor padrão do get é sobrescrito pelo teste isinstance."
+  },
+  {
+    "mutante": "sac_omnichannel.cdc.x_avaliar_arrependimento__mutmut_6",
+    "justificativa": "muda só o texto da mensagem de erro; o teste confere o tipo da exceção e a palavra 'futuro'."
+  }
+]

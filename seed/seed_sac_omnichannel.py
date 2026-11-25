@@ -132,7 +132,7 @@ BORDAS = [
     ("corpo_vazio", "Sem corpo", "", "vazio@%s" % DOMINIO, "sac-banco-sac"),
     ("corpo_so_espacos", "Só espaços", "   \n\t  ", "espaco@%s" % DOMINIO, "sac-banco-sac"),
     ("emoji_e_cjk", "Cadê meu pedido 😡📦 注文はどこ", "Já faz 15 dias 😤😤😤 配送が遅い", "emoji@%s" % DOMINIO, "sac-varejo-pedidos"),
-    ("rtl_override", "‮OCIDEP ON‬", "texto com override de direção ‮gnirts", "rtl@%s" % DOMINIO, "sac-varejo-pedidos"),
+    ("rtl_override", "‮OCIDEP ON‬", "texto com override de direção ‮gnirts", "rtl@%s" % DOMINIO, "sac-varejo-pedidos"),  # nosec B613
     ("acentos_nfc_nfd", "Reclamação", "Reclamação (decomposto)", "nfd@%s" % DOMINIO, "sac-banco-sac"),
     ("controle_ascii", "Ctrl\x01\x02\x1f", "bytes de controle \x07\x08\x0b\x0c", "ctrl@%s" % DOMINIO, "sac-telecom-sinal"),
     ("email_maiusculo", "E-mail em maiúsculas", "para testar comparação de e-mail", "CLIENTE.MAIUSCULO@%s" % DOMINIO.upper(), "sac-varejo-pedidos"),

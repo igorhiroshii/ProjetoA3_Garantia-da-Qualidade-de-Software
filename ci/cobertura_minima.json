@@ -1,0 +1,8 @@
+{
+  "src/helpdesk/management/commands/escalate_tickets.py": 1.0,
+  "src/helpdesk/models.py": 0.8,
+  "src/helpdesk/update_ticket.py": 0.8725,
+  "src/helpdesk/user.py": 0.8684,
+  "src/helpdesk/views/api.py": 0.6538,
+  "src/helpdesk/views/staff.py": 0.8878
+}

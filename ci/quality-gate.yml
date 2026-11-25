@@ -1,61 +1,115 @@
-# Quality gate do A3 (GitHub Actions). Copie para .github/workflows/ do repositório do grupo.
-# Três portões: (1) testes de defeito/guarda sobre o Django-Helpdesk, (2) mutação nos módulos críticos,
-# (3) triagem de urgência contra o conjunto de ouro. Os limites são PROPOSTA do grupo, não norma.
+# Quality gate do A3. Copiar para .github/workflows/quality-gate.yml na raiz do repositório do grupo
+# (a raiz é a pasta sac_qa_kit). O job final "quality-gate" é o ÚNICO check obrigatório da branch main.
+# Os limites são PROPOSTA do grupo, justificados no documento de entregáveis (seção 4 e 6).
 name: quality-gate
+
 on:
   pull_request:
   push: { branches: [main] }
-  schedule: [{ cron: "0 6 * * 1" }]          # segunda 06:00 UTC: mutação completa e avaliação com LLM real
+  schedule: [{ cron: "0 9 * * 1" }]            # segunda 06:00 em Brasília: mutação pesada e LLM real
+
+concurrency: { group: "qg-${{ github.ref }}", cancel-in-progress: true }
+permissions: { contents: read }
+
+env:
+  PYTHON: "3.12"
+  HELPDESK_COMMIT: "7154322"                   # commit auditado do django-helpdesk (2.6.2); trocar com revisão
 
 jobs:
-  testes-e-seguranca:
+  lint-e-seguranca:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
-        with: { repository: django-helpdesk/django-helpdesk, ref: main, path: django-helpdesk }   # ajuste o ref para a versão auditada
       - uses: actions/setup-python@v5
-        with: { python-version: "3.12" }
-      - run: pip install -e "django-helpdesk[test]" pytest-django hypothesis freezegun bandit
-      - name: Testes A3 (defeitos confirmados ficam como xfail strict: se alguém corrigir, o CI avisa)
+        with: { python-version: "${{ env.PYTHON }}", cache: pip }
+      - run: pip install ruff bandit
+      - name: "Lint (ruff, regras E F W I B)"
+        run: ruff check .
+      - name: "Análise estática de segurança (bandit) no código do grupo, falha em severidade média ou alta"
+        run: bandit -r sac_omnichannel triage seed -ll -q
+
+  testes-de-unidade:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "${{ env.PYTHON }}", cache: pip }
+      - run: pip install pytest pytest-cov pytest-bdd hypothesis
+      - name: "Testes sem banco, com cobertura de RAMO"
+        run: |
+          python -m pytest tests/test_a3_triage.py tests/test_a3_triage_mutantes.py \
+            tests/test_cdc_arrependimento.py tests/test_bdd_sac.py \
+            --cov --cov-branch --cov-report=term-missing --cov-fail-under=90 -q
+
+  testes-de-integracao:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: "django-helpdesk no commit auditado"
+        run: |
+          git clone https://github.com/django-helpdesk/django-helpdesk.git django-helpdesk
+          git -C django-helpdesk checkout "$HELPDESK_COMMIT"
+      - uses: actions/setup-python@v5
+        with: { python-version: "${{ env.PYTHON }}", cache: pip }
+      - run: pip install -e "./django-helpdesk" pytest pytest-django pytest-cov hypothesis freezegun djangorestframework
+      - name: "Suite original do Helpdesk (esperado: 720 passam, 2 pulados)"
         working-directory: django-helpdesk
         env: { DJANGO_SETTINGS_MODULE: tests.test_settings }
-        run: python -m pytest ../tests -p no:cacheprovider --no-cov -q -W ignore
-      - name: Varredura estática (bandit) apenas em severidade média/alta
-        run: bandit -r django-helpdesk/helpdesk -ll -q || true       # informativo; troque por falha quando houver baseline limpo
+        run: |
+          python -m pytest tests -p no:cacheprovider --ignore=tests/e2e -q -W ignore \
+            --cov=helpdesk --cov-branch --cov-report=json:../cov-helpdesk.json
+      - name: "Testes A3 (defeitos conhecidos ficam como xfail estrito; XPASS quebra o build)"
+        working-directory: django-helpdesk
+        env: { DJANGO_SETTINGS_MODULE: tests.test_settings, PYTHONPATH: "src:." }
+        run: |
+          python -m pytest ../tests/test_a3_escalation.py ../tests/test_a3_security_perf.py \
+            ../tests/test_a3_workflow_properties.py ../tests/test_a3_mutation_killers.py \
+            -p no:cacheprovider --no-cov -q -W ignore
+      - name: "Catraca de cobertura de ramo nos arquivos críticos"
+        run: python ci/checar_cobertura.py cov-helpdesk.json ci/cobertura_minima.json
 
-  triagem-llm:
+  gate-da-triagem:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "3.12" }
-      - run: pip install pytest hypothesis
-      - name: Testes dos guardrails
-        run: python -m pytest tests/test_a3_triage.py tests/test_a3_triage_mutantes.py -p no:cacheprovider -q
-      - name: Gate da triagem (perfis roteirizados; reprova violação nova)
+        with: { python-version: "${{ env.PYTHON }}", cache: pip }
+      - name: "Avaliação com perfis de LLM roteirizados (reprova violação nova)"
         run: python -m triage.rodar_avaliacao --gate --conhecidas ci/gate_conhecido.json --saida results/avaliacao_roteirizada.json
       - uses: actions/upload-artifact@v4
         if: always()
         with: { name: avaliacao-triagem, path: results/avaliacao_roteirizada.json }
 
-  mutacao-semanal:
-    if: github.event_name == 'schedule'
+  mutacao:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "3.12" }
-      - run: pip install pytest hypothesis mutmut==3.8.1
-      - name: Mutação em triage/triage.py (exige pelo menos 95% dos mutantes testáveis mortos)
+        with: { python-version: "${{ env.PYTHON }}", cache: pip }
+      - run: pip install pytest pytest-bdd hypothesis mutmut==3.8.1
+      - name: "Mutação em triage.py e cdc.py (cerca de 1 minuto), nenhum sobrevivente fora da lista de equivalentes"
         run: |
           mutmut run --max-children 4
-          python - <<'PY'
-          import subprocess,re
-          out=subprocess.run(["mutmut","results"],capture_output=True,text=True).stdout
-          vivos=len(re.findall(r"survived",out)); print("sobreviventes:",vivos)
-          assert vivos<=15, "score de mutação abaixo do limite"
-          PY
+          mutmut results --all true | python ci/checar_mutacao.py --equivalentes ci/mutantes_equivalentes.json --minimo 0.95
+
+  mutacao-semanal-helpdesk:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          git clone https://github.com/django-helpdesk/django-helpdesk.git django-helpdesk
+          git -C django-helpdesk checkout "$HELPDESK_COMMIT"
+      - uses: actions/setup-python@v5
+        with: { python-version: "${{ env.PYTHON }}", cache: pip }
+      - run: pip install -e "./django-helpdesk" pytest pytest-django hypothesis freezegun djangorestframework mutmut==3.8.1
+      - name: "Mutação em helpdesk/user.py com a suíte de permissões (meta de 100% de mortos, linha de base 61 de 61)"
+        working-directory: django-helpdesk
+        env: { DJANGO_SETTINGS_MODULE: tests.test_settings }
+        run: |
+          echo "Rodar mutmut run com source_paths=src/helpdesk/user.py e os 7 arquivos de teste de permissão."
+          echo "Referência: results/mutmut_depois_stats.json (61 de 61)."
 
   llm-real:
     if: github.event_name == 'schedule' && vars.USAR_LLM_REAL == 'true'
@@ -63,8 +117,42 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "3.12" }
+        with: { python-version: "${{ env.PYTHON }}", cache: pip }
       - run: pip install anthropic
-      - name: Gate com modelo real (limites completos: recall >= 0,95; FN crítico = 0; injeção = 0)
+      - name: "Gate com modelo real (limites completos)"
         env: { ANTHROPIC_API_KEY: "${{ secrets.ANTHROPIC_API_KEY }}" }
         run: python -m triage.rodar_avaliacao --real --gate --saida results/avaliacao_real.json
+
+  quality-gate:                                  # check único exigido na proteção da main
+    needs: [lint-e-seguranca, testes-de-unidade, testes-de-integracao, gate-da-triagem, mutacao]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Falha se qualquer portão falhou ou foi pulado"
+        run: |
+          echo '${{ toJSON(needs) }}' | python -c "import json,sys; n=json.load(sys.stdin); ruins={k:v['result'] for k,v in n.items() if v['result']!='success'}; print(ruins or 'todos os portões passaram'); sys.exit(1 if ruins else 0)"
+
+  entrega-em-homologacao:
+    needs: [quality-gate]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: homologacao                      # aprovação manual configurada no ambiente do GitHub
+    steps:
+      - uses: actions/checkout@v4
+      - name: "Empacotar a versão"
+        run: git archive --format=tar.gz -o "sac-${GITHUB_SHA::7}.tar.gz" HEAD
+      - uses: actions/upload-artifact@v4
+        with: { name: pacote-homologacao, path: "sac-*.tar.gz" }
+      - name: "Publicar na homologação (esqueleto: o grupo define o alvo e os segredos)"
+        if: vars.HOMOLOG_HOST != ''
+        env:
+          HOST: ${{ vars.HOMOLOG_HOST }}
+          USUARIO: ${{ vars.HOMOLOG_USER }}
+          CHAVE: ${{ secrets.HOMOLOG_SSH_KEY }}
+        run: |
+          install -m 600 /dev/null chave && printf '%s\n' "$CHAVE" > chave
+          scp -i chave -o StrictHostKeyChecking=accept-new sac-*.tar.gz "$USUARIO@$HOST:/srv/sac/releases/"
+          ssh -i chave "$USUARIO@$HOST" "/srv/sac/bin/ativar_release.sh sac-${GITHUB_SHA::7}.tar.gz"
+      - name: "Teste de fumaça pós-entrega"
+        if: vars.HOMOLOG_URL != ''
+        run: curl --fail --max-time 10 "${{ vars.HOMOLOG_URL }}/" -o /dev/null
